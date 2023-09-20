@@ -18,5 +18,5 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-//$router->get('/cpu', 'ServerController@getCpuData');
+$router->get('/cpu/percentage', 'ServerController@getCpuPercentage');
 $router->get('/ram', 'ServerController@getRamData');

@@ -7,54 +7,38 @@ use Illuminate\Http\Request;
 class ServerController extends Controller
 {
 
-    
-    public function getRamData()
+    public function getCpuPercentage()
     {
-        $output = null;
-        $retval = null;
+        $this->setHeader();
+        $output = shell_exec("top -bn 1 | awk '/Cpu\(s\):/ {print $2}'");
+        $totalUsage = floatval($output);
 
-        // Exécute la commande vmstat et récupère la sortie
-        exec('free', $output, $retval);
+        // Conversion du pourcentage total d'utilisation en une chaîne JSON
+        $jsonData = ['total_usage' => $totalUsage];
 
-        if ($retval == 0) {
-            // Traite la sortie pour obtenir les données du CPU
-            $cpuData = $this->parseFreeOutput($output);
-            return response()->json($cpuData);
-        } else {
-            // Retourne une réponse d'erreur si la commande échoue
-            return response()->json(['error' => 'Could not retrieve CPU data'], 500);
-        }
+
+        // Envoi de la chaîne JSON en tant que réponse
+        return response()->json($jsonData);
     }
 
-    private function parseFreeOutput($output)
+    public function getRamData()
     {
-        $systemData = [];
+        $this->setHeader();
 
-        foreach ($output as $line) {
-            // Extraction des informations sur la mémoire (RAM) à partir de la sortie de la commande 'free'
-            if (preg_match('/^Mem:\s+(\d+)\s+(\d+)\s+(\d+)/', $line, $matches)) {
-                $systemData['total_memory_kb'] = intval($matches[1]);
-                $systemData['used_memory_kb'] = intval($matches[2]);
-                $systemData['free_memory_kb'] = intval($matches[3]);
-            }
+        $output = shell_exec('free');
+        $lines = explode("\n", $output);
 
-            // Extraction des informations sur le swap à partir de la sortie de la commande 'free'
-            if (preg_match('/^Swap:\s+(\d+)\s+(\d+)\s+(\d+)/', $line, $matches)) {
-                $systemData['total_swap_kb'] = intval($matches[1]);
-                $systemData['used_swap_kb'] = intval($matches[2]);
-                $systemData['free_swap_kb'] = intval($matches[3]);
-            }
-        }
+        $memoryValues = preg_split('/\s+/', $lines[1]);
+        $jsonData = [
+            'total' => $memoryValues[1],
+            'utilized' => $memoryValues[2],
+            'cache' => $memoryValues[5],
+        ];
 
-        // Calcul des pourcentages d'utilisation de la mémoire et du swap
-        if (isset($systemData['total_memory_kb']) && isset($systemData['used_memory_kb'])) {
-            $systemData['memory_usage_percentage'] = ($systemData['used_memory_kb'] / $systemData['total_memory_kb']) * 100;
-        }
-        if (isset($systemData['total_swap_kb']) && isset($systemData['used_swap_kb'])) {
-            $systemData['swap_usage_percentage'] = ($systemData['used_swap_kb'] / $systemData['total_swap_kb']) * 100;
-        }
 
-        return $systemData;
+
+        // Envoi de la chaîne JSON en tant que réponse
+        return response()->json($jsonData);
     }
 
 
