@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Http\Request;
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
@@ -16,3 +17,6 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+//$router->get('/cpu', 'ServerController@getCpuData');
+$router->get('/ram', 'ServerController@getRamData');
