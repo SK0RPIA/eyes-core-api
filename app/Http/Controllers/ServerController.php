@@ -7,6 +7,22 @@ use Illuminate\Http\Request;
 class ServerController extends Controller
 {
 
+    public function initPanel()
+    {
+        $this->setHeader();
+        $output = shell_exec("cat /proc/cpuinfo | grep 'model name' | head -n 1 | awk -F ': ' '{print $2}'");
+        $output2 = shell_exec("nproc --all");
+        $cpuName = trim($output);
+        $totalCore = floatval($output2);
+
+
+        $jsonData = ['total_core' => $totalCore, 'cpu_name' => $cpuName,];
+
+
+        return response()->json($jsonData);
+
+    }
+
     public function getCpuPercentage()
     {
         $this->setHeader();
