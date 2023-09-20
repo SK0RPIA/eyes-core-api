@@ -21,3 +21,4 @@ $router->get('/', function () use ($router) {
 $router->get('/init', 'ServerController@initPanel');
 $router->get('/cpu/percentage', 'ServerController@getCpuPercentage');
 $router->get('/ram', 'ServerController@getRamData');
+$router->get('/raid', 'ServerController@getRaidStatus');
