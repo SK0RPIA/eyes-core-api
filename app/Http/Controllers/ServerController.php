@@ -90,42 +90,58 @@ class ServerController extends Controller
     {
         $this->setHeader();
 
-        // Exécution de la commande 'lsblk' pour obtenir la liste des disques
-        $output = shell_exec('lsblk --output NAME,SIZE,TYPE,MOUNTPOINT');
-        $lines = explode("\n", trim($output));
+        // Exécution de la commande 'lsblk' pour obtenir la liste des disques et partitions
+        $lsblkOutput = shell_exec('lsblk --output NAME,TYPE,MOUNTPOINT');
+        $lines = explode("\n", trim($lsblkOutput));
 
         $diskData = [];
+        $partitions = []; // Tableau pour stocker les partitions
 
         foreach ($lines as $line) {
-            if (preg_match('/^(\S+)\s+(\S+)\s+(\S+)\s*(\S*)/', $line, $matches)) {
+            if (preg_match('/^(\S+)\s+(\S+)\s*(\S*)/', $line, $matches)) {
+                $cleanedName = preg_replace('/[^a-zA-Z0-9]/', '', $matches[1]); // Nettoyer le nom
+
                 $diskInfo = [
-                    'name' => $matches[1],
-                    'size' => $matches[2],
-                    'type' => $matches[3],
-                    'mount_point' => $matches[4] ?? null,
+                    'name' => $cleanedName,
+                    'type' => $matches[2],
+                    'mount_point' => $matches[3] ?? null,
                 ];
 
-                // Si le type est 'disk', alors nous procédons à obtenir plus de détails
-                if ($diskInfo['type'] == 'disk') {
-                    // Exécution de la commande 'df' pour obtenir le pourcentage d'utilisation du stockage et l'espace utilisé
-                    $dfOutput = shell_exec('df -h /dev/' . $diskInfo['name']);
-                    if (preg_match('/(\d+)\%\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/', $dfOutput, $dfMatches)) {
-                        $diskInfo['storage_usage_percentage'] = $dfMatches[1] . '%';
-                        $diskInfo['storage_used'] = $dfMatches[3];
-                        $diskInfo['storage_available'] = $dfMatches[4];
+                if ($diskInfo['name'] !== "NAME") {
+                    $dfOutput = shell_exec('df /dev/' . $diskInfo['name']);
+
+                    $dfLines = explode("\n", trim($dfOutput));
+
+                    if (count($dfLines) > 1) {
+                        $diskLine = $dfLines[1]; // Prendre la seconde ligne
+                        if (preg_match('/\/dev\/\S+\s+(\d+)\s+(\d+)\s+\d+\s+(\d+)%/', $diskLine, $dfMatches)) {
+                            $diskInfo['storage_total'] = intval($dfMatches[1]) * 1024; // Convertir les blocs de 1K en octets
+                            $diskInfo['storage_used'] = intval($dfMatches[2]) * 1024; // Convertir les blocs de 1K en octets
+                            $diskInfo['storage_usage_percentage'] = $dfMatches[3] . '%';
+                        }
+                    }
+
+                    // Si c'est un disque, ajoutez-le à la liste principale
+                    if ($diskInfo['type'] === 'disk') {
+                        $diskInfo['partitions'] = []; // Initialiser les partitions
+                        $diskData[$diskInfo['name']] = $diskInfo;
+                    }
+                    // Si c'est une partition, trouvez le disque parent et ajoutez-la à ses partitions
+                    elseif (isset($diskData[substr($diskInfo['name'], 0, 3)])) {
+                        $diskData[substr($diskInfo['name'], 0, 3)]['partitions'][] = $diskInfo;
+                        $partitions[] = $diskInfo; // Ajouter la partition à la liste des partitions
                     }
                 }
-
-
-
-                if ($diskInfo['name'] != "NAME")
-                    array_push($diskData, $diskInfo);
             }
         }
 
         // Envoi de la chaîne JSON en tant que réponse
-        return response()->json($diskData);
+        return response()->json($partitions); // Renvoyer uniquement le tableau des partitions
     }
+
+
+
+
 
 
 
