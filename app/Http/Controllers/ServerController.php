@@ -107,14 +107,13 @@ class ServerController extends Controller
 
                 // Si le type est 'disk', alors nous procédons à obtenir plus de détails
                 if ($diskInfo['type'] == 'disk') {
-                    // Exécution de la commande 'df' pour obtenir le pourcentage d'utilisation du stockage
+                    // Exécution de la commande 'df' pour obtenir le pourcentage d'utilisation du stockage et l'espace utilisé
                     $dfOutput = shell_exec('df -h /dev/' . $diskInfo['name']);
-                    if (preg_match('/\d+%/', $dfOutput, $dfMatches)) {
-                        $diskInfo['storage_usage_percentage'] = $dfMatches[0];
+                    if (preg_match('/(\d+)\%\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/', $dfOutput, $dfMatches)) {
+                        $diskInfo['storage_usage_percentage'] = $dfMatches[1] . '%';
                         $diskInfo['storage_used'] = $dfMatches[3];
                         $diskInfo['storage_available'] = $dfMatches[4];
                     }
-
                 }
 
 
