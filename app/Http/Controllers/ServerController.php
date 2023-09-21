@@ -86,5 +86,48 @@ class ServerController extends Controller
         return response()->json($raidData);
     }
 
+    public function getDiskData()
+    {
+        $this->setHeader();
+
+        // Exécution de la commande 'lsblk' pour obtenir la liste des disques
+        $output = shell_exec('lsblk --output NAME,SIZE,TYPE,MOUNTPOINT');
+        $lines = explode("\n", trim($output));
+
+        $diskData = [];
+
+        foreach ($lines as $line) {
+            if (preg_match('/^(\S+)\s+(\S+)\s+(\S+)\s*(\S*)/', $line, $matches)) {
+                $diskInfo = [
+                    'name' => $matches[1],
+                    'size' => $matches[2],
+                    'type' => $matches[3],
+                    'mount_point' => $matches[4] ?? null,
+                ];
+
+                // Si le type est 'disk', alors nous procédons à obtenir plus de détails
+                if ($diskInfo['type'] == 'disk') {
+                    // Exécution de la commande 'df' pour obtenir le pourcentage d'utilisation du stockage
+                    $dfOutput = shell_exec('df -h /dev/' . $diskInfo['name']);
+                    if (preg_match('/\d+%/', $dfOutput, $dfMatches)) {
+                        $diskInfo['storage_usage_percentage'] = $dfMatches[0];
+                        $diskInfo['storage_used'] = $dfMatches[3];
+                        $diskInfo['storage_available'] = $dfMatches[4];
+                    }
+
+                }
+
+
+
+                if ($diskInfo['name'] != "NAME")
+                    array_push($diskData, $diskInfo);
+            }
+        }
+
+        // Envoi de la chaîne JSON en tant que réponse
+        return response()->json($diskData);
+    }
+
+
 
 }
