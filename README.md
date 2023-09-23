@@ -1,26 +1,61 @@
-# Lumen PHP Framework
+# eyes-core-api
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://img.shields.io/packagist/dt/laravel/lumen-framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://img.shields.io/packagist/v/laravel/lumen-framework)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://img.shields.io/packagist/l/laravel/lumen)](https://packagist.org/packages/laravel/lumen-framework)
+**The backend API service for eyes-core, providing real-time system performance metrics. Delivers data seamlessly to the eyes-core dashboard.**
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+![API Endpoint Screenshot](futur_screen.png)
 
-> **Note:** In the years since releasing Lumen, PHP has made a variety of wonderful performance improvements. For this reason, along with the availability of [Laravel Octane](https://laravel.com/docs/octane), we no longer recommend that you begin new projects with Lumen. Instead, we recommend always beginning new projects with [Laravel](https://laravel.com).
+## Table of Contents
+1. [Features](#features)
+2. [Requirements](#requirements)
+3. [Installation](#installation)
+4. [Configuration](#configuration)
+5. [Endpoints](#endpoints)
+6. [Usage](#usage)
+7. [Contribution](#contribution)
+8. [License](#license)
 
-## Official Documentation
+## Features
+- **High Performance:** Efficiently gathers and delivers system performance metrics.
+- **Optimized for eyes-core:** Tailored to provide data in the best format for the eyes-core dashboard.
+- **Secure:** Implements best practices to ensure data integrity and security.
 
-Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
+## Requirements
+- PHP 7.4 or newer
+- Composer
+- A server (like nginx or Apache)
 
-## Contributing
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/eyes-core-api.git
+   ```
+   
+2. Navigate to the project directory:
+   ```bash
+   cd eyes-core-api
+   ```
 
-Thank you for considering contributing to Lumen! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. Install dependencies with Composer:
+   ```bash
+   composer install
+   ```
+   
+## Configuration
 
-## Security Vulnerabilities
+- Rename the .env.example file to .env.
+- Update the database and other configuration details in the .env file as necessary.
 
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+## Endpoints
+/disk: Fetches disk and partition metrics.
+/cpu: Provides CPU usage details.
+/ram: Delivers RAM utilization metrics.
+
+## Usage
+Start the API server. (The method will depend on your server software.)
+Test the API using a tool like Postman or by navigating to http://api.yourdomain.com/disk in a web browser.
+
+## Contribution
+Contributions are heartily welcome! Please go through the contribution guidelines before making any changes.
 
 ## License
-
-The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is under the MIT License. Refer to the LICENCE document for more specifics.
